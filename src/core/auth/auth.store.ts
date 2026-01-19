@@ -1,10 +1,13 @@
 import { create } from "zustand";
 import { tokenStorage } from "./auth.storage";
+import { useMenuStore } from "../menu/menu.store";
 
 interface AuthState {
   token: string | null;
   isAuthenticated: boolean;
-  login: (token: string) => void;
+  permissions: string[];
+
+  setAuth: (token: string, permissions: string[]) => void;
   logout: () => void;
   restore: () => void;
 }
@@ -12,21 +15,38 @@ interface AuthState {
 export const useAuthStore = create<AuthState>((set) => ({
   token: tokenStorage.get(),
   isAuthenticated: !!tokenStorage.get(),
+  permissions: [],
 
-  login: (token) => {
+  // Called AFTER backend returns permissions
+  setAuth: (token, permissions) => {
     tokenStorage.set(token);
-    set({ token, isAuthenticated: true });
+    set({
+      token,
+      permissions,
+      isAuthenticated: true,
+    });
   },
 
   logout: () => {
     tokenStorage.remove();
-    set({ token: null, isAuthenticated: false });
+    useMenuStore.getState().clearMenus();
+
+    set({
+      token: null,
+      permissions: [],
+      isAuthenticated: false,
+    });
   },
 
+  // Restore ONLY token (permissions come from API)
   restore: () => {
     const token = tokenStorage.get();
     if (token) {
-      set({ token, isAuthenticated: true });
+      set({
+        token,
+        isAuthenticated: true,
+        permissions: [],
+      });
     }
   },
 }));
