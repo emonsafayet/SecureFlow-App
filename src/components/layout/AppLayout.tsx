@@ -1,15 +1,21 @@
+import { useState } from "react";
 import { Outlet } from "react-router-dom";
- 
-import Topbar from "./Topbar"; 
 import Sidebar from "./Sidebar";
+import Topbar from "./Topbar";
 
 function AppLayout() {
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  const handleMenuClick = () => {
+    setSidebarOpen((prev) => !prev);
+  };
+
   return (
     <div>
-      <Topbar />
+      <Topbar onMenuClick={handleMenuClick} />
 
       <div style={{ display: "flex" }}>
-        <Sidebar />
+        <Sidebar open={sidebarOpen} />
 
         <main style={{ padding: 16, flex: 1 }}>
           <Outlet />

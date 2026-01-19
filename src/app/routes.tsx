@@ -1,17 +1,19 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LoginPage from "../modules/auth/LoginPage";
 import DashboardPage from "../modules/dashboard/DashboardPage";
-import AppLayout from "../components/layout/AppLayout";
-import RequirePermission from "./permission.guard";
 import UsersPage from "../modules/users/UsersPage";
+import RequirePermission from "./permission.guard";
+import AppShell from "../components/layout/AppShell";
 
 export function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
+        {/*  Public route */}
         <Route path="/login" element={<LoginPage />} />
 
-        <Route element={<AppLayout />}>
+        {/*  Protected routes with AppShell */}
+        <Route element={<AppShell />}>
           <Route
             path="/dashboard"
             element={

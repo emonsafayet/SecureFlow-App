@@ -1,9 +1,15 @@
-function Topbar() {
+interface TopbarProps {
+  onMenuClick: () => void;
+}
+
+const Topbar = ({ onMenuClick }: TopbarProps) => {
   return (
-    <header style={{ padding: 16, background: "#1976d2", color: "#fff" }}>
-      <h4>Admin Panel</h4>
+    <header>
+      <button onClick={onMenuClick}>
+        ☰
+      </button>
     </header>
   );
-}
+};
 
 export default Topbar;
