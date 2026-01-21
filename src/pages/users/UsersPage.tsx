@@ -19,17 +19,20 @@ import { Can } from "../../auth/Can";
 import { FormModal } from "../../components/modal/FormModal";
 import { UserForm } from "../../forms/users/UserForm";
 import type { UserFormValues } from "../../forms/users/user.schema";
- 
+import type { ValidationErrorResponse } from "../../services/errors";
 
 /* =======================
-   TYPES
+   TYPES (BACKEND ALIGNED)
 ======================= */
 
 interface User {
-  id: string;
-  name: string;
+  id: string;      // Guid
+  userId: number;  // DB id
   email: string;
-  status: "Active" | "Inactive";
+  firstName?: string;
+  lastName?: string;
+  isActive: boolean;
+  userType: string;
 }
 
 interface PagedResult<T> {
@@ -38,54 +41,35 @@ interface PagedResult<T> {
 }
 
 /* =======================
-   MOCK API
-======================= */
-
-async function fetchUsers(
-  page: number,
-  pageSize: number
-): Promise<PagedResult<User>> {
-  await new Promise((r) => setTimeout(r, 400));
-
-  const all: User[] = Array.from({ length: 57 }).map((_, i) => ({
-    id: String(i + 1),
-    name: `User ${i + 1}`,
-    email: `user${i + 1}@mail.com`,
-    status: i % 2 === 0 ? "Active" : "Inactive",
-  }));
-
-  return {
-    items: all.slice(page * pageSize, page * pageSize + pageSize),
-    totalCount: all.length,
-  };
-}
-
-/* =======================
    PAGE
 ======================= */
 
 export default function UsersPage() {
-  /* Pagination */
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
-  /* Data */
   const [data, setData] = useState<PagedResult<User>>({
     items: [],
     totalCount: 0,
   });
 
-  /* CRUD Modal State */
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<User | null>(null);
   const [saving, setSaving] = useState(false);
 
-  /* Load data */
+  /* Load users */
   const load = async () => {
     loadingService.show();
     try {
-      const res = await fetchUsers(page, pageSize);
-      setData(res);
+      const res = await userService.getUsers({
+        pageNumber: page + 1,
+        pageSize,
+      });
+
+      setData({
+        items: res.data,
+        totalCount: res.totalCount,
+      });
     } finally {
       loadingService.hide();
     }
@@ -96,7 +80,7 @@ export default function UsersPage() {
   }, [page, pageSize]);
 
   /* -----------------------
-     CRUD HANDLERS
+     CRUD
   ----------------------- */
 
   function openCreate() {
@@ -111,32 +95,39 @@ export default function UsersPage() {
 
   async function handleSubmit(values: UserFormValues) {
     setSaving(true);
+    try {
+      if (editing) {
+        await userService.update(editing.userId, values);
+        snackbarService.show({ message: "User updated", severity: "success" });
+      } else {
+        await userService.create(values);
+        snackbarService.show({ message: "User created", severity: "success" });
+      }
 
-    if (editing) {
-      await userService.update(editing.id, values);
+      setModalOpen(false);
+      load();
+    } catch (e: unknown) {
+      const err = e as ValidationErrorResponse;
+      const first =
+        err?.errors && Object.values(err.errors)[0]?.[0];
+
       snackbarService.show({
-        message: "User updated successfully",
-        severity: "success",
+        message: first ?? "Operation failed",
+        severity: "error",
       });
-    } else {
-      await userService.create(values);
-      snackbarService.show({
-        message: "User created successfully",
-        severity: "success",
-      });
+    } finally {
+      setSaving(false);
     }
-
-    setSaving(false);
-    setModalOpen(false);
-    load();
   }
 
   async function deleteUser(user: User) {
     const ok = await alertService.confirm({
-      message: `Delete ${user.name}?`,
+      message: `Delete user ${user.email}?`,
     });
 
     if (!ok) return;
+
+    await userService.delete(user.userId);
 
     snackbarService.show({
       message: "User deleted",
@@ -147,7 +138,7 @@ export default function UsersPage() {
   }
 
   /* -----------------------
-     Columns
+     TABLE COLUMNS
   ----------------------- */
 
   const allColumns: Array<{
@@ -155,22 +146,28 @@ export default function UsersPage() {
     header: string;
     render?: (row: User) => React.ReactElement;
   }> = [
-    { field: "name", header: "Name" },
     { field: "email", header: "Email" },
-    { field: "status", header: "Status" },
+    { field: "firstName", header: "First Name" },
+    { field: "lastName", header: "Last Name" },
+    { field: "userType", header: "User Type" },
+    {
+      field: "isActive",
+      header: "Active",
+      render: (row) => (
+        <Typography>{row.isActive ? "Yes" : "No"}</Typography>
+      ),
+    },
     {
       field: "id",
       header: "Actions",
-      render: (row: User) => (
+      render: (row) => (
         <Stack direction="row" spacing={1}>
           <Can permission="USER_VIEW">
-            <ViewButton onClick={() => console.log("view", row.id)} />
+            <ViewButton onClick={() => console.log(row.userId)} />
           </Can>
-
           <Can permission="USER_EDIT">
             <EditButton onClick={() => openEdit(row)} />
           </Can>
-
           <Can permission="USER_DELETE">
             <DeleteButton onClick={() => deleteUser(row)} />
           </Can>
@@ -183,18 +180,12 @@ export default function UsersPage() {
     useColumnPrefs("users.columns", allColumns);
 
   /* -----------------------
-     Render
+     RENDER
   ----------------------- */
 
   return (
     <Box>
-      {/* Header */}
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-        mb={2}
-      >
+      <Stack direction="row" justifyContent="space-between" mb={2}>
         <Typography variant="h6">Users</Typography>
 
         <Stack direction="row" spacing={1}>
@@ -212,13 +203,11 @@ export default function UsersPage() {
         </Stack>
       </Stack>
 
-      {/* Table */}
       <DataTable<User>
         columns={visibleColumns}
         rows={data.items}
       />
 
-      {/* Pagination */}
       <DataTablePagination
         page={page}
         pageSize={pageSize}
@@ -230,7 +219,6 @@ export default function UsersPage() {
         }}
       />
 
-      {/* CREATE / EDIT MODAL */}
       <FormModal
         open={modalOpen}
         title={editing ? "Edit User" : "Create User"}
@@ -238,14 +226,20 @@ export default function UsersPage() {
         onSubmit={() =>
           document
             .getElementById("user-form")
-            ?.dispatchEvent(
-              new Event("submit", { cancelable: true, bubbles: true })
-            )
+            ?.dispatchEvent(new Event("submit", { bubbles: true }))
         }
         submitting={saving}
       >
         <UserForm
-          defaultValues={editing ?? undefined}
+          defaultValues={
+            editing
+              ? {
+                 name: `${editing.firstName} ${editing.lastName}`.trim(),
+                 email: editing.email,
+                 status: editing.isActive ? "Active" : "Inactive",
+                }
+              : undefined
+          }
           onSubmit={handleSubmit}
         />
       </FormModal>
