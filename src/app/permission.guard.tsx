@@ -11,7 +11,7 @@ function RequirePermission({ permission, children }: Props) {
   const permissions = useAuthStore((s) => s.permissions);
 
   if (!permissions.includes(permission)) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   return children;

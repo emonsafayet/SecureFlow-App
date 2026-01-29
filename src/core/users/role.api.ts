@@ -1,4 +1,4 @@
-import { axiosInstance } from "../api/axios.instance";
+import { api } from "../api/axios.instance";
 
  
 
@@ -8,11 +8,11 @@ export interface UserRoleDto {
 }
 
 export const getUserRoles = (userId: string) =>
-  axiosInstance.get<UserRoleDto[]>(`/users/${userId}/roles`);
+  api.get<UserRoleDto[]>(`/users/${userId}/roles`);
 
 export const assignUserRoles = (userId: string, roleIds: string[]) =>
-  axiosInstance.post(`/users/${userId}/roles`, roleIds);
+  api.post(`/users/${userId}/roles`, roleIds);
 
 // assumed / existing
 export const getAllRoles = () =>
-  axiosInstance.get<{ id: string; name: string }[]>(`/roles`);
+  api.get<{ id: string; name: string }[]>(`/roles`);

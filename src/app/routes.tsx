@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "../modules/auth/LoginPage";
 import DashboardPage from "../modules/dashboard/DashboardPage";
 import UsersPage from "../modules/users/UsersPage";
@@ -9,6 +9,9 @@ export function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Default redirect */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
+
         {/*  Public route */}
         <Route path="/login" element={<LoginPage />} />
 
