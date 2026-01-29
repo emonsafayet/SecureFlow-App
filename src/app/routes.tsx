@@ -7,6 +7,7 @@ import RequirePermission from "./permission.guard";
 import AppShell from "../components/layout/AppShell";
 import RolesPage from "@/modules/roles/RolesPage";
 import AuditLogsPage from "@/modules/audit/AuditLogsPage";
+import PermissionMatrixPage from "@/modules/permissions/PermissionMatrixPage";
 
 export function AppRoutes() {
   return (
@@ -67,6 +68,14 @@ export function AppRoutes() {
           </RequirePermission>
         }
       />
+    <Route
+      path="/permissions/matrix"
+      element={
+        <RequirePermission permission="ROLE_PERMISSION_ASSIGN">
+          <PermissionMatrixPage />
+        </RequirePermission>
+      }
+    /> 
       </Routes>
     </BrowserRouter>
   );
