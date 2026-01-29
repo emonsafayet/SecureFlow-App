@@ -9,15 +9,17 @@ export const api = axios.create({
 });
 
 // Request interceptor
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("access_token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.data?.errors) {
+      return Promise.reject(error.response.data);
     }
-    return config;
-  },
-  (error) => Promise.reject(error)
+
+    return Promise.reject({
+      message: "Something went wrong",
+    });
+  }
 );
 
 // Response interceptor
