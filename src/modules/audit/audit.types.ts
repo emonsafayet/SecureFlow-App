@@ -5,5 +5,8 @@ export interface AuditLogDto {
   action: string;
   performedBy: string;
   performedOn: string;
+
+  beforeData?: string;
+  afterData?: string;
   changes?: string;
 }
