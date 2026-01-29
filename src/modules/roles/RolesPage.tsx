@@ -7,12 +7,17 @@ import { roleService, type RoleDto } from "@/services/role.service";
 import RoleModal from "./RoleModal";
 import { DataTable } from "@/components/DataTable/DataTable";
 import type { RoleFormValues } from "./RoleForm";
+import ConfirmDialog from "@/components/modal/ConfirmDialog";
 
 export default function RolesPage() {
   const [roles, setRoles] = useState<RoleDto[]>([]);
   const [selectedRole, setSelectedRole] = useState<RoleDto | null>(null);
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  // delete confirmation state
+  const [deleteRole, setDeleteRole] = useState<RoleDto | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
 
   useEffect(() => {
     loadRoles();
@@ -22,6 +27,7 @@ export default function RolesPage() {
     const res = await roleService.getRoles();
     setRoles(res);
   }
+ 
 
   const columns: Column<RoleDto>[] = [
     { field: "name", header: "Name" },
@@ -69,6 +75,19 @@ export default function RolesPage() {
       setSubmitting(false);
     }
   }
+ //  confirm delete handler
+  async function confirmDelete() {
+    if (!deleteRole) return;
+
+    setDeleting(true);
+    try {
+      await roleService.delete(deleteRole.id);
+      setDeleteRole(null);
+      loadRoles();
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   return (
     <Box p={2}>
@@ -92,7 +111,19 @@ export default function RolesPage() {
             setSelectedRole(null);
           }}
         />
-      )}
+      )} 
+
+      {deleteRole && (
+        <ConfirmDialog
+          open
+          title="Delete Role"
+          message={`Are you sure you want to delete role "${deleteRole.name}"? This action cannot be undone.`}
+          loading={deleting}
+          onClose={() => setDeleteRole(null)}
+          onConfirm={confirmDelete}
+        />
+      )} 
+      
     </Box>
   );
 }
