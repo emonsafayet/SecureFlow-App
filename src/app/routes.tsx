@@ -41,7 +41,12 @@ export function AppRoutes() {
             path="/users/:id/roles"
             element={
               <RequirePermission permission="USER_MANAGE">
-                <UserRolesPage />
+                <UserRolesPage user={{
+                  id: "",
+                  email: ""
+                }} onClose={function (): void {
+                  throw new Error("Function not implemented.");
+                } } />
               </RequirePermission>
             }
           />

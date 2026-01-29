@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Box, Typography, CircularProgress } from "@mui/material";
 
-import { FormModal } from './../../components/modal/FormModal';
+import { FormModal } from "@/components/modal/FormModal";
 import {
   getUserRoles,
   getAllRoles,
@@ -19,6 +19,7 @@ interface Props {
 
 export default function UserRoleModal({ user, onClose }: Props) {
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [roles, setRoles] = useState<{ id: string; name: string }[]>([]);
   const [assignedRoleIds, setAssignedRoleIds] = useState<string[]>([]);
 
@@ -38,8 +39,13 @@ export default function UserRoleModal({ user, onClose }: Props) {
   }, [user.id]);
 
   const handleSubmit = async (values: { roleIds: string[] }) => {
-    await assignUserRoles(user.id, values.roleIds);
-    onClose();
+    setSubmitting(true);
+    try {
+      await assignUserRoles(user.id, values.roleIds);
+      onClose();
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -47,7 +53,12 @@ export default function UserRoleModal({ user, onClose }: Props) {
       open
       title="Assign Roles"
       onClose={onClose}
-      onSubmit={() => {}} // handled inside form 
+      onSubmit={() => {
+        // submit is triggered from inside the form
+        const event = new Event("submit", { bubbles: true, cancelable: true });
+        document.getElementById("user-role-form")?.dispatchEvent(event);
+      }}
+      submitting={submitting}
     >
       <Box>
         <Typography variant="body2" color="text.secondary" mb={2}>
@@ -58,9 +69,11 @@ export default function UserRoleModal({ user, onClose }: Props) {
           <CircularProgress />
         ) : (
           <UserRoleForm
-              allRoles={roles}
-              defaultRoleIds={assignedRoleIds}
-              onSubmit={handleSubmit} formId={""}          />
+            formId="user-role-form"
+            allRoles={roles}
+            defaultRoleIds={assignedRoleIds}
+            onSubmit={handleSubmit}
+          />
         )}
       </Box>
     </FormModal>

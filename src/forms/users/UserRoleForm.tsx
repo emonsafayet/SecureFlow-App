@@ -15,12 +15,14 @@ import {
 } from "./userRole.schema";
 
 interface Props {
+   formId: string;
   allRoles: { id: string; name: string }[];
   defaultRoleIds: string[];
   onSubmit: (values: UserRoleFormValues) => void;
 }
 
 export function UserRoleForm({
+   formId,
   allRoles,
   defaultRoleIds,
   onSubmit,
@@ -39,7 +41,7 @@ export function UserRoleForm({
   }, [defaultRoleIds, setValue]);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form  id={formId} onSubmit={handleSubmit(onSubmit)}>
       <Stack spacing={2}>
         <Typography variant="h6">
           Assign Roles
