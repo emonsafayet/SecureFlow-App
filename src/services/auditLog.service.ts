@@ -6,6 +6,8 @@ export interface AuditLogQuery {
   pageSize: number;
   entityType?: string;
   action?: string;
+  fromDate?: string; // ISO string
+  toDate?: string;   // ISO string
 }
 
 export interface AuditLogResponse {

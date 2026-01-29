@@ -16,9 +16,11 @@ export default function AuditLogsPage() {
   const [filters, setFilters] = useState<{
     entityType?: string;
     action?: string;
+    fromDate?: string;
+    toDate?: string;
   }>({});
 
- useEffect(() => {
+useEffect(() => {
   async function loadAuditLogs() {
     const res = await auditLogService.getLogs({
       pageNumber: page,
@@ -58,13 +60,16 @@ export default function AuditLogsPage() {
         Audit Logs
       </Typography>
 
-      <AuditLogFilters
+     <AuditLogFilters
         entityType={filters.entityType}
         action={filters.action}
+        fromDate={filters.fromDate}
+        toDate={filters.toDate}
         onChange={(k, v) =>
-          setFilters((f) => ({ ...f, [k]: v || undefined }))
+            setFilters((f) => ({ ...f, [k]: v }))
         }
-      />
+        />
+
 
       <DataTable
         columns={columns}
