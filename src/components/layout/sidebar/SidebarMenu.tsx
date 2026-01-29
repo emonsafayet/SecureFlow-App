@@ -1,8 +1,9 @@
+import type { MenuItem } from "@/core/menu/menu.types";
 import SidebarMenuItem from "./SidebarMenuItem";
-import type { MenuItemDto } from "../../../core/menu/menu.types";
+ 
 
 interface Props {
-  menus: MenuItemDto[];
+  menus: MenuItem[];
 }
 
 function SidebarMenu({ menus }: Props) {
