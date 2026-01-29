@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Box, Button, Stack, Typography } from "@mui/material";
-
+import { exportToExcel } from "@/utils/excel";
 import { DataTable } from "@/components/DataTable/DataTable";
 import type { Column } from "@/components/DataTable/types";
 import AuditLogFilters from "./AuditLogFilters";
@@ -55,6 +55,29 @@ useEffect(() => {
       render: (r) => r.changes ?? "-",
     },
   ];
+
+  async function exportExcel() {
+  setExporting(true);
+  try {
+    const data = await auditLogService.exportLogs(filters);
+
+    exportToExcel(
+      "audit-logs.xlsx",
+      "Audit Logs",
+      data.map((x) => ({
+        Entity: x.entityType,
+        Action: x.action,
+        PerformedBy: x.performedBy,
+        Date: new Date(x.performedOn).toISOString(),
+        EntityId: x.entityId,
+        Changes: x.changes ?? "",
+      }))
+    );
+  } finally {
+    setExporting(false);
+  }
+}
+
 async function exportCsv() {
   setExporting(true);
   try {
@@ -78,24 +101,34 @@ async function exportCsv() {
 }
   return (
     <Box p={2}>
-     <Stack
-            direction="row"
-            justifyContent="space-between"
-            alignItems="center"
-            mb={2}
+    <Stack
+  direction="row"
+  justifyContent="space-between"
+  alignItems="center"
+  mb={2}
+>
+  <Typography variant="h5">
+    Audit Logs
+  </Typography>
+
+        <Stack direction="row" spacing={1}>
+            <Button
+            variant="outlined"
+            onClick={exportCsv}
+            disabled={exporting}
             >
-            <Typography variant="h5">
-                Audit Logs
-            </Typography>
+            Export CSV
+            </Button>
 
             <Button
-                variant="outlined"
-                onClick={exportCsv}
-                disabled={exporting}
+            variant="outlined"
+            onClick={exportExcel}
+            disabled={exporting}
             >
-                {exporting ? "Exporting…" : "Export CSV"}
+            Export Excel
             </Button>
-            </Stack>
+        </Stack>
+        </Stack>
 
 
      <AuditLogFilters
