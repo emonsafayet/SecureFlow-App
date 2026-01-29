@@ -1,17 +1,19 @@
 import { useEffect, useState } from "react";
-import { Box, Typography } from "@mui/material";
+import { Box, Button, Stack, Typography } from "@mui/material";
 
 import { DataTable } from "@/components/DataTable/DataTable";
 import type { Column } from "@/components/DataTable/types";
 import AuditLogFilters from "./AuditLogFilters";
 import type { AuditLogDto } from "./audit.types";
 import { auditLogService } from "@/services/auditLog.service";
+import { exportToCsv } from "@/utils/csv";
 
 export default function AuditLogsPage() {
   const [rows, setRows] = useState<AuditLogDto[]>([]);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(0);
+  const [exporting, setExporting] = useState(false); 
 
   const [filters, setFilters] = useState<{
     entityType?: string;
@@ -53,12 +55,48 @@ useEffect(() => {
       render: (r) => r.changes ?? "-",
     },
   ];
+async function exportCsv() {
+  setExporting(true);
+  try {
+    const data = await auditLogService.exportLogs(filters);
 
+    exportToCsv(
+      "audit-logs.csv",
+      data.map((x) => ({
+        Entity: x.entityType,
+        Action: x.action,
+        PerformedBy: x.performedBy,
+        Date: new Date(x.performedOn).toISOString(),
+        EntityId: x.entityId,
+        Changes: x.changes ?? "",
+      }))
+    ); 
+
+  } finally {
+    setExporting(false);
+  }
+}
   return (
     <Box p={2}>
-      <Typography variant="h5" mb={2}>
-        Audit Logs
-      </Typography>
+     <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            mb={2}
+            >
+            <Typography variant="h5">
+                Audit Logs
+            </Typography>
+
+            <Button
+                variant="outlined"
+                onClick={exportCsv}
+                disabled={exporting}
+            >
+                {exporting ? "Exporting…" : "Export CSV"}
+            </Button>
+            </Stack>
+
 
      <AuditLogFilters
         entityType={filters.entityType}
