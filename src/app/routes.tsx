@@ -5,6 +5,7 @@ import UsersPage from "../modules/users/UsersPage";
 import UserRolesPage from "../modules/users/UserRolesPage";
 import RequirePermission from "./permission.guard";
 import AppShell from "../components/layout/AppShell";
+import RolesPage from "@/modules/roles/RolesPage";
 
 export function AppRoutes() {
   return (
@@ -34,9 +35,7 @@ export function AppRoutes() {
                 <UsersPage />
               </RequirePermission>
             }
-          />
-
-          
+          /> 
           <Route
             path="/users/:id/roles"
             element={
@@ -51,6 +50,14 @@ export function AppRoutes() {
             }
           />
         </Route>
+        <Route
+        path="/roles"
+        element={
+          <RequirePermission permission="ROLE_MANAGE">
+            <RolesPage />
+          </RequirePermission>
+        }
+      />
       </Routes>
     </BrowserRouter>
   );
