@@ -1,20 +1,24 @@
 import { create } from "zustand";
-import type { MenuItemDto } from "./menu.types";
 import { fetchMyMenus } from "./menu.api";
+import type { MenuItem } from "./menu.types";
+import { filterMenusByPermission } from "./menu.utils";
 
 interface MenuState {
-  menus: MenuItemDto[];
+  menus: MenuItem[];
   loading: boolean;
 
   loadMenus: () => Promise<{
-    menus: MenuItemDto[];
+    menus: MenuItem[];
     permissions: string[];
   }>;
 
   clearMenus: () => void;
+
+  /** Derived */
+  visibleMenus: () => MenuItem[];
 }
 
-export const useMenuStore = create<MenuState>((set) => ({
+export const useMenuStore = create<MenuState>((set, get) => ({
   menus: [],
   loading: false,
 
@@ -25,10 +29,15 @@ export const useMenuStore = create<MenuState>((set) => ({
 
     set({ menus, loading: false });
 
+    // permissions should already be stored in auth store
     return { menus, permissions };
   },
 
   clearMenus: () => {
     set({ menus: [], loading: false });
   },
+
+  /** Permission-aware menus */
+  visibleMenus: () =>
+    filterMenusByPermission(get().menus),
 }));

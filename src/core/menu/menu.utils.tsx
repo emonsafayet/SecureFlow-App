@@ -1,6 +1,23 @@
-import { MenuIconRegistry } from "./menu.icons";
+import type { MenuItem } from "./menu.types";
+import { hasPermission } from "@/core/auth/permission.utils";
 
-export function resolveMenuIcon(iconKey?: string) {
-  if (!iconKey) return null;
-  return MenuIconRegistry[iconKey] ?? null;
+export function filterMenusByPermission(
+  menus: MenuItem[]
+): MenuItem[] {
+  return menus
+    .filter(
+      (menu) =>
+        menu.isActive &&
+        hasPermission(menu.identifierName)
+    )
+    .map((menu) => ({
+      ...menu,
+      children: menu.children
+        ? filterMenusByPermission(menu.children)
+        : undefined,
+    }))
+    .filter(
+      (menu) =>
+        !menu.children || menu.children.length > 0
+    );
 }

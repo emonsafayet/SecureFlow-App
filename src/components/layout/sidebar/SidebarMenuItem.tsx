@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom";
-import type { MenuItemDto } from "../../../core/menu/menu.types";
-import { resolveMenuIcon } from "../../../core/menu/menu.utils";
+
+import { MenuIconRegistry } from "@/core/menu/menu.icons";
+import type { MenuItem } from "@/core/menu/menu.types";
 
 interface Props {
-  menu: MenuItemDto;
+  menu: MenuItem;
 }
 
 function SidebarMenuItem({ menu }: Props) {
@@ -12,14 +13,18 @@ function SidebarMenuItem({ menu }: Props) {
   return (
     <li>
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        {resolveMenuIcon(menu.icon)}
-        {menu.path ? (
-          <Link to={menu.path}>{menu.name}</Link>
+        {/* Icon */}
+        {menu.iconClass && MenuIconRegistry[menu.iconClass]}
+
+        {/* Label */}
+        {menu.url ? (
+          <Link to={menu.url}>{menu.name}</Link>
         ) : (
           <span>{menu.name}</span>
         )}
       </div>
 
+      {/* Children */}
       {menu.children && menu.children.length > 0 && (
         <ul style={{ marginLeft: 16 }}>
           {menu.children.map((child) => (

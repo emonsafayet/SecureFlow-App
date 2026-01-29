@@ -1,24 +1,30 @@
-import type { MenuItemDto } from "./menu.types";
+import type { MenuItem } from "./menu.types";
 
-export const mockMenus: MenuItemDto[] = [
+export const mockMenus: MenuItem[] = [
   {
     id: 1,
     name: "Dashboard",
-    path: "/dashboard",
-    identifier: "DASHBOARD_VIEW",
-    icon: "Dashboard",
+    url: "/dashboard",
+    identifierName: "DASHBOARD_VIEW",
+    iconClass: "Dashboard",
     isActive: true,
     order: 1,
     children: [],
+    isParent: false,
+    sequence: 0,
+    canEdit: false
   },
   {
     id: 2,
     name: "Users",
-    path: "/users",
-    identifier: "USER_MANAGE",
-    icon: "Users",
+    url: "/users",
+    identifierName: "USER_MANAGE",
+    iconClass: "Users",
     isActive: true,
     order: 2,
     children: [],
+    isParent: false,
+    sequence: 0,
+    canEdit: false
   },
 ];

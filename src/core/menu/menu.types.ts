@@ -1,10 +1,14 @@
-export interface MenuItemDto {
+export interface MenuItem {
   id: number;
   name: string;
-  path?: string;              // from Url (nullable)
-  identifier: string;         // from IdentifierName (CRITICAL)
-  icon?: string;              // from IconClass
-  isActive: boolean;
+  url?: string;
+  identifierName: string;  
+  iconClass?: string;
+  parentId?: number;
+  isParent: boolean;
+  sequence: number;
   order: number;
-  children?: MenuItemDto[];
+  isActive: boolean;
+  canEdit: boolean;
+  children?: MenuItem[];
 }
