@@ -6,6 +6,7 @@ import UserRolesPage from "../modules/users/UserRolesPage";
 import RequirePermission from "./permission.guard";
 import AppShell from "../components/layout/AppShell";
 import RolesPage from "@/modules/roles/RolesPage";
+import AuditLogsPage from "@/modules/audit/AuditLogsPage";
 
 export function AppRoutes() {
   return (
@@ -55,6 +56,14 @@ export function AppRoutes() {
         element={
           <RequirePermission permission="ROLE_MANAGE">
             <RolesPage />
+          </RequirePermission>
+        }
+      />
+      <Route
+        path="/audit-logs"
+        element={
+          <RequirePermission permission="AUDIT_VIEW">
+            <AuditLogsPage />
           </RequirePermission>
         }
       />
