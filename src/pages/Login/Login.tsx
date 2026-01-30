@@ -1,25 +1,44 @@
 import { useState } from "react";
-import { authApi } from "@/core/api/auth.api";
+import { useNavigate } from "react-router-dom";
 
-export const Login = () => {
+import { useAuthStore } from "@/core/auth/auth.store";
+import { useMenuStore } from "@/core/menu/menu.store";
+import { login, setAuthToken } from "@/services/auth.service";
+
+export default function Login() {
+  const navigate = useNavigate();
+  const loadMenus = useMenuStore((s) => s.loadMenus);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleLogin = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
     try {
-      setLoading(true);
-      setError("");
+      // 1. Login
+      const res = await login({ email, password });
+      const data = (res as { data?: { accessToken?: string; AccessToken?: string } })?.data ?? (res as { accessToken?: string; AccessToken?: string });
+      const token = data?.accessToken ?? (data as { AccessToken?: string })?.AccessToken;
+      if (!token) throw new Error("Token missing");
 
-      const res = await authApi.login({
-        email,
-        password,
-      });
+      // 2. Persist token and attach to axios before menu request
+      localStorage.setItem("access_token", token);
+      setAuthToken(token);
 
-      console.log("Login Success:", res.data); 
-    } catch (err: unknown) {
-      console.error("Login Failed:", err);
+      // 3. Load menus/current to get permissions (required by RequirePermission)
+      const { permissions } = await loadMenus();
+
+      // 4. Update auth store so RequirePermission allows /dashboard
+      useAuthStore.getState().setAuth(token, permissions);
+
+      // 5. Navigate (guard will allow because permissions are set)
+      navigate("/dashboard", { replace: true });
+    } catch {
       setError("Invalid email or password");
     } finally {
       setLoading(false);
@@ -27,25 +46,48 @@ export const Login = () => {
   };
 
   return (
-    <div style={{ padding: 30 }}>
-      <h2>Login</h2>
+    <div className="min-h-screen bg-slate-100 flex items-center justify-center px-4">
+      <div className="w-full max-w-md bg-white rounded-xl shadow-md p-8">
 
-      <input type="email"  placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)}
-      />
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-semibold">SecureFlow</h1>
+          <p className="text-slate-500">Sign in to your workspace</p>
+        </div>
 
-      <br /><br />
+        {error && (
+          <div className="mb-4 text-sm text-red-600 bg-red-50 p-3 rounded">
+            {error}
+          </div>
+        )}
 
-      <input type="password" placeholder="Password" value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <input
+            type="email"
+            placeholder="admin@secureflow.com"
+            className="w-full border rounded px-3 py-2"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
 
-      <br /><br />
+          <input
+            type="password"
+            placeholder="••••••••"
+            className="w-full border rounded px-3 py-2"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
 
-      <button onClick={handleLogin} disabled={loading}>
-        {loading ? "Logging in..." : "Login"}
-      </button>
-
-      {error && <p style={{ color: "red" }}>{error}</p>}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+          >
+            {loading ? "Signing in..." : "Sign in"}
+          </button>
+        </form>
+      </div>
     </div>
   );
-};
+}

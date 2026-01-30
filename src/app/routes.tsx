@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import LoginPage from "../modules/auth/LoginPage";
+import Login from "@/pages/Login/Login";
 import DashboardPage from "../modules/dashboard/DashboardPage";
 import UsersPage from "../modules/users/UsersPage";
 import UserRolesPage from "../modules/users/UserRolesPage";
@@ -18,7 +18,7 @@ export function AppRoutes() {
         <Route path="/" element={<Navigate to="/login" replace />} />
 
         {/* Public route */}
-        <Route path="/login" element={<LoginPage />} />
+        <Route path="/login" element={<Login />} />
 
         {/* Protected routes with AppShell */}
         <Route element={<AppShell />}>

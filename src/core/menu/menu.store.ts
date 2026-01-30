@@ -1,43 +1,20 @@
 import { create } from "zustand";
-import { fetchMyMenus } from "./menu.api";
+import api from "@/core/http/axios";
 import type { MenuItem } from "./menu.types";
-import { filterMenusByPermission } from "./menu.utils";
 
-interface MenuState {
+export const useMenuStore = create<{
   menus: MenuItem[];
-  loading: boolean;
-
-  loadMenus: () => Promise<{
-    menus: MenuItem[];
-    permissions: string[];
-  }>;
-
-  clearMenus: () => void;
-
-  /** Derived */
-  visibleMenus: () => MenuItem[];
-}
-
-export const useMenuStore = create<MenuState>((set, get) => ({
+  loadMenus: () => Promise<{ menus: MenuItem[]; permissions: string[] }>;
+}>((set) => ({
   menus: [],
-  loading: false,
 
   loadMenus: async () => {
-    set({ loading: true });
+    const res = await api.get("menus/current");
+    const data = res.data?.data ?? {};
+    const menus = Array.isArray(data?.menus) ? data.menus : [];
+    const permissions = (data?.permissions ?? data?.Permissions ?? []) as string[];
 
-    const { menus, permissions } = await fetchMyMenus();
-
-    set({ menus, loading: false });
-
-    // permissions should already be stored in auth store
+    set({ menus });
     return { menus, permissions };
   },
-
-  clearMenus: () => {
-    set({ menus: [], loading: false });
-  },
-
-  /** Permission-aware menus */
-  visibleMenus: () =>
-    filterMenusByPermission(get().menus),
 }));

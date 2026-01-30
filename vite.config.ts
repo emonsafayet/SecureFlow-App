@@ -9,4 +9,14 @@ export default defineConfig({
       "@": path.resolve(__dirname, "src"),
     },
   },
+  server: {
+    // When VITE_API_BASE_URL is empty, frontend calls /api/* (same-origin). This proxy forwards to backend.
+    proxy: {
+      "/api": {
+        target: "https://localhost:7024", // backend URL is defined here in dev
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
 });
