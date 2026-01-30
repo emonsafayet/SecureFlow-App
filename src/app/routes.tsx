@@ -8,6 +8,7 @@ import AppShell from "../components/layout/AppShell";
 import RolesPage from "@/modules/roles/RolesPage";
 import AuditLogsPage from "@/modules/audit/AuditLogsPage";
 import PermissionMatrixPage from "@/modules/permissions/PermissionMatrixPage";
+import AuditRetentionPage from "@/modules/audit/AuditRetentionPage";
 
 export function AppRoutes() {
   return (
@@ -76,6 +77,15 @@ export function AppRoutes() {
         </RequirePermission>
       }
     /> 
+    <Route
+    path="/audit-retention"
+    element={
+      <RequirePermission permission="AUDIT_RETENTION_MANAGE">
+        <AuditRetentionPage />
+      </RequirePermission>
+    }
+  />
+
       </Routes>
     </BrowserRouter>
   );
