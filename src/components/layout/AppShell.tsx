@@ -15,7 +15,7 @@ export default function AppShell() {
   return (
     <Box sx={{ display: "flex" }}>
       <TopBar onMenuClick={handleToggle} />
-      <Sidebar open={open} onClose={handleToggle} />
+      <Sidebar open={open} />
 
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Toolbar />

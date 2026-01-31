@@ -1,14 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 import { useAuthStore } from "@/core/auth/auth.store";
 import { useMenuStore } from "@/core/menu/menu.store";
 import { login, setAuthToken } from "@/services/auth.service";
 
 export default function Login() {
   const navigate = useNavigate();
-  const loadMenus = useMenuStore((s) => s.loadMenus);
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -30,13 +27,14 @@ export default function Login() {
       localStorage.setItem("access_token", token);
       setAuthToken(token);
 
-      // 3. Load menus/current to get permissions (required by RequirePermission)
-      const { permissions } = await loadMenus();
+      // 3. Load menus/current (populates menu store with menus + permissions)
+      await useMenuStore.getState().loadMenus();
+      const permissions = useMenuStore.getState().permissions;
 
-      // 4. Update auth store so RequirePermission allows /dashboard
+      // 4. Update auth store (required by RequirePermission on protected routes)
       useAuthStore.getState().setAuth(token, permissions);
 
-      // 5. Navigate (guard will allow because permissions are set)
+      // 5. Navigate
       navigate("/dashboard", { replace: true });
     } catch {
       setError("Invalid email or password");
@@ -91,3 +89,7 @@ export default function Login() {
     </div>
   );
 }
+
+
+
+

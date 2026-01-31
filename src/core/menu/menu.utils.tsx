@@ -7,7 +7,7 @@ export function filterMenusByPermission(
   return menus
     .filter(
       (menu) =>
-        menu.isActive &&
+        (menu.isActive !== false) &&
         hasPermission(menu.identifierName)
     )
     .map((menu) => ({

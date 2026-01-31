@@ -1,20 +1,24 @@
 import { create } from "zustand";
-import api from "@/core/http/axios";
+import { fetchMyMenus } from "./menu.api";
 import type { MenuItem } from "./menu.types";
-
-export const useMenuStore = create<{
+interface MenuState {
   menus: MenuItem[];
-  loadMenus: () => Promise<{ menus: MenuItem[]; permissions: string[] }>;
-}>((set) => ({
+  permissions: string[];
+  loadMenus: () => Promise<void>;
+}
+
+export const useMenuStore = create<MenuState>((set) => ({
   menus: [],
+  permissions: [],
 
   loadMenus: async () => {
-    const res = await api.get("menus/current");
-    const data = res.data?.data ?? {};
-    const menus = Array.isArray(data?.menus) ? data.menus : [];
-    const permissions = (data?.permissions ?? data?.Permissions ?? []) as string[];
-
-    set({ menus });
-    return { menus, permissions };
+    try {
+      const { menus, permissions } = await fetchMyMenus();
+      set({ menus, permissions });
+    } catch (error) {
+      console.error("Failed to load menus", error);
+      set({ menus: [], permissions: [] });
+    }
   },
 }));
+

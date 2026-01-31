@@ -1,39 +1,28 @@
-import { Link } from "react-router-dom";
-
-import { MenuIconRegistry } from "@/core/menu/menu.icons";
+import { NavLink } from "react-router-dom";
 import type { MenuItem } from "@/core/menu/menu.types";
+import { iconMap } from "./iconMap";
 
 interface Props {
-  menu: MenuItem;
+  item: MenuItem;
+  collapsed: boolean;
 }
 
-function SidebarMenuItem({ menu }: Props) {
-  if (!menu.isActive) return null;
+export default function SidebarMenuItem({ item, collapsed }: Props) {
+  const Icon = iconMap[item.iconClass ?? "dashboard"] ?? iconMap.default;
 
   return (
-    <li>
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        {/* Icon */}
-        {menu.iconClass && MenuIconRegistry[menu.iconClass]}
-
-        {/* Label */}
-        {menu.url ? (
-          <Link to={menu.url}>{menu.name}</Link>
-        ) : (
-          <span>{menu.name}</span>
-        )}
-      </div>
-
-      {/* Children */}
-      {menu.children && menu.children.length > 0 && (
-        <ul style={{ marginLeft: 16 }}>
-          {menu.children.map((child) => (
-            <SidebarMenuItem key={child.id} menu={child} />
-          ))}
-        </ul>
-      )}
-    </li>
+    <NavLink
+      to={item.url || "#"}
+      className={({ isActive }) =>
+        `flex items-center gap-3 px-3 py-2 rounded transition ${
+          isActive
+            ? "bg-blue-600 text-white"
+            : "text-slate-300 hover:bg-slate-800"
+        }`
+      }
+    >
+      <Icon size={18} />
+      {!collapsed && <span>{item.name}</span>}
+    </NavLink>
   );
 }
-
-export default SidebarMenuItem;

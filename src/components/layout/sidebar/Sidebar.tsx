@@ -1,44 +1,37 @@
-import {
-  Drawer,
-  Toolbar,
-  Box,
-  useMediaQuery,
-  type Theme,
-} from "@mui/material";
-import SidebarMenu from "./SidebarMenu";
-import { useMenuStore } from "../../../core/menu/menu.store";
-
-const drawerWidth = 240;
+import { useEffect } from "react";
+import { useMenuStore } from "@/core/menu/menu.store";
+import SidebarMenuItem from "./SidebarMenuItem";
 
 interface Props {
   open: boolean;
-  onClose: () => void;
 }
 
-export default function Sidebar({ open, onClose }: Props) {
-  const menus = useMenuStore((s) => s.menus);
-  const isMobile = useMediaQuery((theme: Theme) =>
-    theme.breakpoints.down("md")
-  );
+export default function Sidebar({ open }: Props) {
+  const { menus, loadMenus } = useMenuStore();
+
+  useEffect(() => {
+    loadMenus();
+  }, [loadMenus]);
 
   return (
-    <Drawer
-      variant={isMobile ? "temporary" : "permanent"}
-      open={isMobile ? open : true}
-      onClose={onClose}
-      sx={{
-        width: drawerWidth,
-        flexShrink: 0,
-        "& .MuiDrawer-paper": {
-          width: drawerWidth,
-          boxSizing: "border-box",
-        },
-      }}
+    <aside
+      className={`h-screen bg-slate-900 text-white transition-all duration-300 ${
+        open ? "w-64" : "w-16"
+      }`}
     >
-      <Toolbar />
-      <Box sx={{ overflow: "auto", p: 1 }}>
-        <SidebarMenu menus={menus} />
-      </Box>
-    </Drawer>
+      <div className="h-14 flex items-center justify-center border-b border-slate-700">
+        <span className="font-bold">{open ? "SecureFlow" : "SF"}</span>
+      </div>
+
+      <nav className="p-2 space-y-1">
+        {menus.map((menu) => (
+          <SidebarMenuItem
+            key={menu.id}
+            item={menu}
+            collapsed={!open}
+          />
+        ))}
+      </nav>
+    </aside>
   );
 }

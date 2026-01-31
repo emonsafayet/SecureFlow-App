@@ -1,9 +1,10 @@
 export default function Dashboard() {
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <h1 className="text-2xl font-bold">
-        Welcome to SecureFlow Dashboard
-      </h1>
+    <div>
+      <h1 className="text-2xl font-semibold">Dashboard</h1>
+      <p className="text-slate-500 mt-2">
+        Welcome to SecureFlow
+      </p>
     </div>
   );
 }

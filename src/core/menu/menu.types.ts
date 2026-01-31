@@ -2,13 +2,11 @@ export interface MenuItem {
   id: number;
   name: string;
   url?: string;
-  identifierName: string;  
+  identifierName: string;
   iconClass?: string;
-  parentId?: number;
+  parentId?: number | null;
   isParent: boolean;
-  sequence: number;
   order: number;
-  isActive: boolean;
-  canEdit: boolean;
+  isActive?: boolean;
   children?: MenuItem[];
 }
