@@ -1,6 +1,36 @@
-# React + TypeScript + Vite
+## SecureFlow Frontend (React + TypeScript + Vite)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+### Environment configuration
+
+This frontend uses **separate env files per environment**:
+
+- **Local**: `env.local` (used by `npm run dev`)
+- **UAT**: `env.uat` (used by `npm run build:uat`)
+- **Production**: `env.production` (used by `npm run build`)
+
+Set at least:
+
+- **`VITE_API_BASE_URL`**: backend origin (changes per Local/UAT/Prod)
+
+You can start from `env.example`.
+
+### Commands
+
+```bash
+npm install
+npm run dev
+npm run build
+npm run build:uat
+```
+
+### Permissions sync
+
+The permissions generator reads **`VITE_API_BASE_URL`** from the same env files and calls `/api/system/permissions`:
+
+```bash
+npm run permissions:sync
+npm run permissions:sync:uat
+```
 
 Currently, two official plugins are available:
 

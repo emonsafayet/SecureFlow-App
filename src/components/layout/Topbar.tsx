@@ -1,38 +1,45 @@
-import {
-  AppBar,
-  Toolbar,
-  IconButton,
-  Typography,
-  Box,
-} from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
-import DarkModeIcon from "@mui/icons-material/DarkMode";
-import LightModeIcon from "@mui/icons-material/LightMode";
-import { useUiStore } from "../../theme/store/ui.store";
+import { useAuthStore } from "@/core/auth/auth.store";
 
-interface TopbarProps {
-  onMenuClick: () => void;
+interface Props {
+  onMenuClick?: () => void;
 }
 
-export default function Topbar({ onMenuClick }: TopbarProps) {
-  const darkMode = useUiStore((s) => s.darkMode);
-  const toggleDarkMode = useUiStore((s) => s.toggleDarkMode);
+export default function Topbar({ onMenuClick }: Props) {
+  const logout = useAuthStore((s) => s.logout);
+  const user = useAuthStore((s) => s.user);
+
+  const handleLogout = () => {
+    logout();
+    window.location.href = "/login";
+  };
 
   return (
-    <AppBar position="static" elevation={1}>
-      <Toolbar className="flex justify-between">
-        <Box display="flex" alignItems="center" gap={1}>
-          <IconButton onClick={onMenuClick} color="inherit">
-            <MenuIcon />
-          </IconButton>
+    <div className="h-14 flex items-center justify-between px-4 border-b bg-white">
+      <div className="flex items-center gap-2">
+        {onMenuClick && (
+          <button
+            type="button"
+            onClick={onMenuClick}
+            className="px-2 py-1 text-slate-700 hover:bg-slate-100 rounded"
+            aria-label="Toggle menu"
+          >
+            ☰
+          </button>
+        )}
+      </div>
 
-          <Typography variant="h6">SecureFlow</Typography>
-        </Box>
+      <div className="flex items-center gap-3">
+        <span className="text-sm text-slate-600">
+          {user?.email}
+        </span>
 
-        <IconButton onClick={toggleDarkMode} color="inherit">
-          {darkMode ? <LightModeIcon /> : <DarkModeIcon />}
-        </IconButton>
-      </Toolbar>
-    </AppBar>
+        <button
+          onClick={handleLogout}
+          className="text-sm text-red-600 hover:underline"
+        >
+          Logout
+        </button>
+      </div>
+    </div>
   );
 }

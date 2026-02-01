@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/core/auth/auth.store";
-import { useMenuStore } from "@/core/menu/menu.store";
-import { login, setAuthToken } from "@/services/auth.service";
+import { login } from "@/services/auth.service";
 
 export default function Login() {
   const navigate = useNavigate();
+  const loginAuth = useAuthStore((s) => s.login);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -17,24 +18,21 @@ export default function Login() {
     setError("");
 
     try {
-      // 1. Login
       const res = await login({ email, password });
-      const data = (res as { data?: { accessToken?: string; AccessToken?: string } })?.data ?? (res as { accessToken?: string; AccessToken?: string });
-      const token = data?.accessToken ?? (data as { AccessToken?: string })?.AccessToken;
+
+      // normalize response once
+      const token =
+        res?.data?.accessToken ??
+        res?.data?.AccessToken ??
+        res?.accessToken ??
+        res?.AccessToken;
+
       if (!token) throw new Error("Token missing");
 
-      // 2. Persist token and attach to axios before menu request
-      localStorage.setItem("access_token", token);
-      setAuthToken(token);
+      // single source of truth
+      loginAuth(token);
 
-      // 3. Load menus/current (populates menu store with menus + permissions)
-      await useMenuStore.getState().loadMenus();
-      const permissions = useMenuStore.getState().permissions;
-
-      // 4. Update auth store (required by RequirePermission on protected routes)
-      useAuthStore.getState().setAuth(token, permissions);
-
-      // 5. Navigate
+      // menu + permissions will auto-load via effects
       navigate("/dashboard", { replace: true });
     } catch {
       setError("Invalid email or password");
@@ -89,7 +87,3 @@ export default function Login() {
     </div>
   );
 }
-
-
-
-

@@ -1,18 +1,22 @@
-import { Button, CircularProgress } from "@mui/material";
-
-export function SaveButton({
-  loading,
-}: {
+interface SaveButtonProps {
+  onClick?: () => void;
   loading?: boolean;
-}) {
+  children?: React.ReactNode;
+}
+
+export default function SaveButton({
+  onClick,
+  loading,
+  children = "Save",
+}: SaveButtonProps) {
   return (
-    <Button
-      type="submit"
-      variant="contained"
-      startIcon={loading ? <CircularProgress size={14} /> : null}
+    <button
+      onClick={onClick}
       disabled={loading}
+      className="px-4 py-2 rounded bg-blue-600 text-white
+                 hover:bg-blue-700 disabled:opacity-60"
     >
-      Save
-    </Button>
+      {loading ? "Saving..." : children}
+    </button>
   );
 }

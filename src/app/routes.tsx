@@ -1,91 +1,53 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+
 import Login from "@/pages/Login/Login";
-import DashboardPage from "../modules/dashboard/DashboardPage";
-import UsersPage from "../modules/users/UsersPage";
-import UserRolesPage from "../modules/users/UserRolesPage";
-import RequirePermission from "./permission.guard";
-import AppShell from "../components/layout/AppShell";
+import DashboardPage from "@/modules/dashboard/DashboardPage";
+import UsersPage from "@/modules/users/UsersPage";
+import UserRolesPage from "@/modules/users/UserRolesPage";
 import RolesPage from "@/modules/roles/RolesPage";
 import AuditLogsPage from "@/modules/audit/AuditLogsPage";
 import PermissionMatrixPage from "@/modules/permissions/PermissionMatrixPage";
 import AuditRetentionPage from "@/modules/audit/AuditRetentionPage";
+import MainLayout from "@/components/layout/MainLayout";
+import ForbiddenPage from "@/pages/Forbidden/ForbiddenPage";
+import RequireAuth from "./auth.guard";
+ 
 
 export function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Default redirect */}
+        {/* Default */}
         <Route path="/" element={<Navigate to="/login" replace />} />
 
-        {/* Public route */}
+        {/* Public */}
         <Route path="/login" element={<Login />} />
 
-        {/* Protected routes with AppShell */}
-        <Route element={<AppShell />}>
-          <Route
-            path="/dashboard"
-            element={
-              <RequirePermission permission="DASHBOARD_VIEW">
-                <DashboardPage />
-              </RequirePermission>
-            }
-          />
+        {/* Forbidden */}
+        <Route path="/forbidden" element={<ForbiddenPage />} />
 
-          <Route
-            path="/users"
-            element={
-              <RequirePermission permission="USER_MANAGE">
-                <UsersPage />
-              </RequirePermission>
-            }
-          /> 
-          <Route
-            path="/users/:id/roles"
-            element={
-              <RequirePermission permission="USER_MANAGE">
-                <UserRolesPage user={{
-                  id: "",
-                  email: ""
-                }} onClose={function (): void {
-                  throw new Error("Function not implemented.");
-                } } />
-              </RequirePermission>
-            }
-          />
+        {/* Protected (AUTH ONLY) */}
+        <Route element={<RequireAuth />}>
+          <Route element={<MainLayout />}>
+            <Route path="/dashboard" element={<DashboardPage />} />
+
+            <Route path="/users" element={<UsersPage />} />
+            <Route path="/users/:id/roles" element={<UserRolesPage />} />
+
+            <Route path="/roles" element={<RolesPage />} />
+
+            <Route path="/audit-logs" element={<AuditLogsPage />} />
+            <Route path="/audit-retention" element={<AuditRetentionPage />} />
+
+            <Route
+              path="/permissions/matrix"
+              element={<PermissionMatrixPage />}
+            />
+          </Route>
         </Route>
-        <Route
-        path="/roles"
-        element={
-          <RequirePermission permission="ROLE_MANAGE">
-            <RolesPage />
-          </RequirePermission>
-        }
-      />
-      <Route
-        path="/audit-logs"
-        element={
-          <RequirePermission permission="AUDIT_VIEW">
-            <AuditLogsPage />
-          </RequirePermission>
-        }
-      />
-    <Route
-      path="/permissions/matrix"
-      element={
-        <RequirePermission permission="ROLE_PERMISSION_ASSIGN">
-          <PermissionMatrixPage />
-        </RequirePermission>
-      }
-    /> 
-    <Route
-    path="/audit-retention"
-    element={
-      <RequirePermission permission="AUDIT_RETENTION_MANAGE">
-        <AuditRetentionPage />
-      </RequirePermission>
-    }
-  />
 
+        {/* Catch-all */}
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </BrowserRouter>
   );

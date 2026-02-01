@@ -1,57 +1,78 @@
 import { create } from "zustand";
-import { tokenStorage } from "./auth.storage";
-import { api } from "../api/axios.instance";
+import type {  AuthUser } from "./auth.types";
+import { decodeJwt } from "./auth.utils";
 
 interface AuthState {
-  token: string | null;
-  isAuthenticated: boolean;
+  accessToken: string | null;
+  user: AuthUser | null;
   permissions: string[];
+  isAuthenticated: boolean;
   isAuthInitialized: boolean;
 
-  setAuth: (token: string, permissions: string[]) => void;
+  login: (token: string) => void;
   logout: () => void;
-  restore: () => void;
-  markAuthInitialized: () => void;
+  hydrate: () => void;
 }
+
 export const useAuthStore = create<AuthState>((set) => ({
-  token: tokenStorage.get(),
-  isAuthenticated: !!tokenStorage.get(),
+  accessToken: null,
+  user: null,
   permissions: [],
+  isAuthenticated: false,
   isAuthInitialized: false,
 
-  setAuth: (token, permissions) => {
-    tokenStorage.set(token);
-    api.defaults.headers.common.Authorization = `Bearer ${token}`;
+  login: (token) => {
+    const user = decodeJwt(token);
+
+    localStorage.setItem("access_token", token);
+
     set({
-      token,
-      permissions,
+      accessToken: token,
+      user,
+      permissions: user.permissions,
       isAuthenticated: true,
+      isAuthInitialized: true,
     });
   },
 
   logout: () => {
-    tokenStorage.remove();
-    delete api.defaults.headers.common.Authorization;
+    localStorage.removeItem("access_token");
+
     set({
-      token: null,
+      accessToken: null,
+      user: null,
       permissions: [],
       isAuthenticated: false,
       isAuthInitialized: true,
     });
   },
 
-  restore: () => {
-    const token = tokenStorage.get();
-    if (token) {
-      api.defaults.headers.common.Authorization = `Bearer ${token}`;
+  hydrate: () => {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      set({ isAuthInitialized: true });
+      return;
+    }
+
+    try {
+      const user = decodeJwt(token);
+
       set({
-        token,
+        accessToken: token,
+        user,
+        permissions: user.permissions,
         isAuthenticated: true,
+        isAuthInitialized: true,
+      });
+    } catch {
+      localStorage.removeItem("access_token");
+      set({
+        accessToken: null,
+        user: null,
+        permissions: [],
+        isAuthenticated: false,
+        isAuthInitialized: true,
       });
     }
-  },
-
-  markAuthInitialized: () => {
-    set({ isAuthInitialized: true });
   },
 }));
