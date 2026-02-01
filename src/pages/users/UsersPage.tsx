@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Box, Stack, Typography, Button } from "@mui/material";
 
 import { DataTable } from "../../components/DataTable/DataTable";
@@ -58,7 +58,7 @@ export default function UsersPage() {
   const [saving, setSaving] = useState(false);
 
   /* Load users */
-  const load = async () => {
+  const load = useCallback(async () => {
     loadingService.show();
     try {
       const res = await userService.getUsers({
@@ -73,11 +73,11 @@ export default function UsersPage() {
     } finally {
       loadingService.hide();
     }
-  };
+  }, [page, pageSize]);
 
   useEffect(() => {
     load();
-  }, [page, pageSize]);
+  }, [load]);
 
   /* -----------------------
      CRUD

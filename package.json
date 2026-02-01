@@ -4,10 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --mode=local",
+    "dev": "vite",
     "build": "tsc -b && vite build",
     "build:uat": "tsc -b && vite build --mode=uat",
     "lint": "eslint .",
+    "test": "npm run -s lint",
     "preview": "vite preview",
     "prepare": "husky",
     "permissions:sync": "node scripts/generate-permissions.js",

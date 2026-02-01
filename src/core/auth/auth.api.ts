@@ -31,9 +31,18 @@ export const authApi = {
 
     // Handle possible PascalCase keys from backend
     return {
-      accessToken: (data as any)?.accessToken ?? (data as any)?.AccessToken ?? "",
+      accessToken:
+        ("accessToken" in data && typeof data.accessToken === "string"
+          ? data.accessToken
+          : "AccessToken" in data && typeof data.AccessToken === "string"
+            ? data.AccessToken
+            : ""),
       refreshToken:
-        (data as any)?.refreshToken ?? (data as any)?.RefreshToken ?? "",
+        ("refreshToken" in data && typeof data.refreshToken === "string"
+          ? data.refreshToken
+          : "RefreshToken" in data && typeof data.RefreshToken === "string"
+            ? data.RefreshToken
+            : ""),
     };
   },
 };

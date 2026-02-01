@@ -25,9 +25,14 @@ function parseEnvFile(contents: string): Record<string, string> {
 }
 
 function loadEnvForMode(mode: string): Record<string, string> {
-  // Per request: local uses env.local only. UAT/prod use their own files.
+  // Local uses env.local only. UAT/prod use their own files.
+  // Vite dev server uses mode="development" by default.
   const filename =
-    mode === "uat" ? "env.uat" : mode === "production" ? "env.production" : "env.local";
+    mode === "uat"
+      ? "env.uat"
+      : mode === "production"
+        ? "env.production"
+        : "env.local";
 
   const root = path.dirname(fileURLToPath(import.meta.url));
   const envPath = path.join(root, filename);
